@@ -22,6 +22,14 @@ jobs:
       - name: Install DuckDB
         run: pip install duckdb
 
+      - name: Download OFF parquet dump
+        # Single full-file GET - HF answers DuckDB's many range requests with 429.
+        run: |
+          curl -sSL --fail --retry 5 --retry-delay 30 --retry-all-errors \
+            -o food.parquet \
+            "https://huggingface.co/datasets/openfoodfacts/product-database/resolve/main/food.parquet"
+          ls -lh food.parquet
+
       - name: Build SQLite product database
         run: python build_db.py
 

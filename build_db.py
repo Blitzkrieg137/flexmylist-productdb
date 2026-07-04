@@ -14,10 +14,14 @@ import sys
 
 import duckdb
 
-PARQUET_URL = (
+# The workflow pre-downloads the dump (HF rate-limits DuckDB's many range requests
+# with 429); remote access stays as fallback for ad-hoc local runs.
+PARQUET_REMOTE = (
     "https://huggingface.co/datasets/openfoodfacts/product-database"
     "/resolve/main/food.parquet"
 )
+PARQUET_LOCAL = "food.parquet"
+PARQUET = PARQUET_LOCAL if os.path.exists(PARQUET_LOCAL) else PARQUET_REMOTE
 OUT_FILE = "products.db"
 COUNTRIES = ["en:germany", "en:austria", "en:switzerland"]
 # Sanity gate: fail the workflow loudly instead of publishing a broken/empty DB.
@@ -52,7 +56,7 @@ SELECT * FROM (
         ) AS name,
         brands,
         categories_tags[-1] AS category_tag
-    FROM read_parquet('{PARQUET_URL}')
+    FROM read_parquet('{PARQUET}')
     WHERE len(list_intersect(countries_tags, {COUNTRIES!r})) > 0
       AND code IS NOT NULL
 )
