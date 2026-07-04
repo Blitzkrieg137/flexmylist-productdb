@@ -1,0 +1,4 @@
+products.db
+*.gz
+*.sha256
+__pycache__/

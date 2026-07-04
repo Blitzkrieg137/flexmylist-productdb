@@ -1,0 +1,41 @@
+name: build-product-db
+
+on:
+  schedule:
+    # Montags 03:20 UTC - der OFF-Dump wird naechtlich aktualisiert.
+    - cron: "20 3 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install DuckDB
+        run: pip install duckdb
+
+      - name: Build SQLite product database
+        run: python build_db.py
+
+      - name: Compress and checksum
+        run: |
+          gzip -9 products.db
+          sha256sum products.db.gz > products.db.gz.sha256
+          cat products.db.gz.sha256
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="db-$(date +%Y%m%d-%H%M)"
+          gh release create "$TAG" products.db.gz products.db.gz.sha256 \
+            --title "$TAG" \
+            --notes "Woechentlicher Open-Food-Facts-Auszug (DE/AT/CH). Daten © Open Food Facts contributors, ODbL."
