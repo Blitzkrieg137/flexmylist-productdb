@@ -72,7 +72,9 @@ SELECT * FROM (
             product_name[1].text
         ) AS name_en,
         brands,
-        categories_tags[-1] AS category_tag
+        -- Second link of the hierarchy chain ("Alcoholic beverages", not "Scotch whisky");
+        -- falls back to the first for short chains.
+        COALESCE(categories_tags[2], categories_tags[1]) AS category_tag
     FROM read_parquet('{PARQUET}')
     WHERE len(list_intersect(countries_tags, {COUNTRIES!r})) > 0
       AND code IS NOT NULL
