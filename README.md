@@ -1,6 +1,6 @@
 # flexmylist-productdb
 
-Wöchentliche Build-Pipeline für die Offline-Produktdatenbank der FlexMyList-App.
+Wöchentliche Build-Pipeline für die Offline-Produktdatenbank.
 
 Eine GitHub Action lädt den [Open-Food-Facts-Parquet-Dump](https://huggingface.co/datasets/openfoodfacts/product-database)
 (Hugging Face), filtert auf Produkte, die in Deutschland, Österreich oder der Schweiz
